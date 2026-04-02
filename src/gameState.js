@@ -54,6 +54,20 @@ class GameState {
     return constants.ENEMY_SPEED_BASE + Math.floor(this.score / 10) * 0.3;
   }
 
+  awardScore(amount) {
+    if (amount <= 0) {
+      return;
+    }
+
+    this.score += amount;
+    this._onScoreChange(this.score);
+
+    if (this.score > this.highScore) {
+      this.highScore = this.score;
+      saveHighScore(this.highScore, this._storage);
+    }
+  }
+
   flapBird() {
     this.bird.vy = constants.FLAP_STRENGTH;
     this.bird.flapFrame = 8;
@@ -97,12 +111,7 @@ class GameState {
 
       if (!pipe.scored && pipe.x + constants.PIPE_WIDTH / 2 < this.bird.x) {
         pipe.scored = true;
-        this.score += this.scoreMultiplier;
-        this._onScoreChange(this.score);
-        if (this.score > this.highScore) {
-          this.highScore = this.score;
-          saveHighScore(this.highScore, this._storage);
-        }
+        this.awardScore(this.scoreMultiplier);
       }
 
       if (pipe.x + constants.PIPE_WIDTH < -10) {
@@ -211,11 +220,7 @@ class GameState {
           enemy.health--;
           if (enemy.health <= 0) {
             this.enemies.splice(j, 1);
-            this.score += 2 * this.scoreMultiplier;
-            if (this.score > this.highScore) {
-              this.highScore = this.score;
-              saveHighScore(this.highScore, this._storage);
-            }
+            this.awardScore(2 * this.scoreMultiplier);
           }
           break;
         }

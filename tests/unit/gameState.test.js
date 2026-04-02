@@ -205,9 +205,21 @@ describe("GameState", () => {
     test("detects bullet-enemy collision", () => {
       gameState.playerBullets.push({ x: 100, y: 100, radius: 5 });
       gameState.enemies.push({ x: 100, y: 100, radius: 12, health: 1 });
-      
+
       expect(gameState.checkCombatCollisions()).toBe(false);
       expect(gameState.enemies.length).toBe(0);
+    });
+
+    test("notifies with total score when enemy defeated", () => {
+      const onScoreChange = jest.fn();
+      gameState = new GameState({ storage: mockStorage, onScoreChange });
+      gameState.playerBullets.push({ x: 120, y: 120, radius: 5 });
+      gameState.enemies.push({ x: 120, y: 120, radius: 12, health: 1 });
+
+      gameState.checkCombatCollisions();
+
+      expect(onScoreChange).toHaveBeenCalledWith(2);
+      expect(mockStorage._data.flappyHighScore).toBe(2);
     });
 
     test("damages player on enemy bullet collision", () => {
